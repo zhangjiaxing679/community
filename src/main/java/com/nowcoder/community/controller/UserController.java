@@ -116,7 +116,7 @@ public class UserController implements CommunityConstant {
     public String getProfilePage(@PathVariable("userId") int userId,Model model){
         User user=userService.findUserById(userId);
         if(user==null){
-            throw new RuntimeException("改用户不存在");
+            throw new RuntimeException("该用户不存在");
         }
 
         //用户

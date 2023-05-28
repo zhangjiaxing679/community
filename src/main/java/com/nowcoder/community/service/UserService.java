@@ -75,10 +75,16 @@ public class UserService implements CommunityConstant {
         }
         //验证账号
         User u=userMapper.selectByName(user.getUsername());
-        if(u!=null){
+        if(u!=null ){
             map.put("usernameMsg","该账号已存在");
             return map;
         }
+//        //验证密码
+//        u=userMapper.selectByName(user.getUsername());
+//        if(u!=null ){
+//            map.put("usernameMsg","该账号已存在");
+//            return map;
+//        }
         //验证邮箱
         u=userMapper.selectByEmail(user.getEmail());
         if(u!=null){
