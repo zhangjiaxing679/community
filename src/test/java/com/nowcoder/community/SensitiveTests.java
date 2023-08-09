@@ -24,5 +24,13 @@ public class SensitiveTests {
         String text2="这里可以赌Σ博ϧ,可以ϧ吸ϧ毒，可以μ开μ票，哈哈哈哈哈哈！";
         text2=sensitiveFilter.filter(text2);
         System.out.println(text2);
+
+        // 过滤敏感词存在问题的地方
+        String text3="这里可以赌博士，可以ϧ吸ϧ毒，可以μ开μ票，哈哈哈哈哈哈！";
+        text3=sensitiveFilter.filter(text3);
+        System.out.println(text3);
+
+
+
     }
 }

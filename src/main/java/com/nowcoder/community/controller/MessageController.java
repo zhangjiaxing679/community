@@ -22,7 +22,8 @@ import org.springframework.web.util.HtmlUtils;
 import java.util.*;
 
 @Controller
-public class MessageController implements CommunityConstant {
+public class
+MessageController implements CommunityConstant {
 
     @Autowired
     private MessageService messageService;
@@ -144,7 +145,7 @@ public class MessageController implements CommunityConstant {
         message.setCreateTime(new Date());
         messageService.addMessage(message);
 
-        return CommunityUtil.getJSON(0);
+        return CommunityUtil.getJSONString(0);
     }
 
     @RequestMapping(path = "/notice/list", method = RequestMethod.GET)
@@ -153,8 +154,8 @@ public class MessageController implements CommunityConstant {
 
         //查询评论类通知
         Message message = messageService.findLatestNotice(user.getId(), TOPIC_COMMENT);
-        Map<String, Object> messageVO = new HashMap<>();
         if (message != null) {
+            Map<String, Object> messageVO = new HashMap<>();
             messageVO.put("message", message);
 
             String content = HtmlUtils.htmlUnescape(message.getContent());
@@ -175,8 +176,8 @@ public class MessageController implements CommunityConstant {
 
         //查询点赞类通知
         message = messageService.findLatestNotice(user.getId(), TOPIC_LIKE);
-        messageVO = new HashMap<>();
         if (message != null) {
+            Map<String, Object> messageVO = new HashMap<>();
             messageVO.put("message", message);
 
             String content = HtmlUtils.htmlUnescape(message.getContent());
@@ -197,8 +198,8 @@ public class MessageController implements CommunityConstant {
 
         //查询关注类通知
         message = messageService.findLatestNotice(user.getId(), TOPIC_FOLLOW);
-        messageVO = new HashMap<>();
         if (message != null) {
+            Map<String, Object> messageVO = new HashMap<>();
             messageVO.put("message", message);
 
             String content = HtmlUtils.htmlUnescape(message.getContent());

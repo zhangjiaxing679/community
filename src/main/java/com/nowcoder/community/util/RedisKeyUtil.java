@@ -12,6 +12,11 @@ public class RedisKeyUtil {
     private static final String PREFIX_KAPTCHA="kaptcha";
     private static final String PREFIX_TICKET="ticket";
     private static final String PREFIX_USER="user";
+    private static final String PREFIX_CODE="code";
+    private static final String PREFIX_UV="uv";
+    private static final String PREFIX_DAU="dau";
+    private static final String PREFIX_POST="post";
+
 
 
     //某个实体的赞
@@ -42,5 +47,30 @@ public class RedisKeyUtil {
     //用户
     public static String getUserKey(int userId){
         return PREFIX_USER+SPLIT+userId;
+    }
+    //验证码
+    public static String getCodeKey(String email){
+        return PREFIX_CODE+SPLIT+email;
+    }
+    //单日UV
+    public static String getUVKey(String date){
+        return PREFIX_UV+SPLIT+date;
+    }
+    //区间UV
+    public static String getUVKey(String startData,String endData){
+        return PREFIX_UV+SPLIT+startData+SPLIT+endData;
+    }
+    //单日活跃用户
+    public static String getDAUKey(String date){
+        return PREFIX_DAU+SPLIT+date;
+    }
+    //区间UV
+    public static String getDAUKey(String startData,String endData){
+        return PREFIX_DAU+SPLIT+startData+SPLIT+endData;
+    }
+
+    //帖子分数
+    public static String getPostScoreKey(){
+        return PREFIX_POST+SPLIT+"score";
     }
 }

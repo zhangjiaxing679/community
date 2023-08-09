@@ -13,14 +13,12 @@ import org.apache.tomcat.util.http.HeaderUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -111,6 +109,7 @@ public class UserService implements CommunityConstant {
 
         return map;
     }
+
     public int activation(int userID,String code){
         User user=userMapper.selectById(userID);
         if (user.getStatus() == 1) {
@@ -165,6 +164,68 @@ public class UserService implements CommunityConstant {
         map.put("ticket",loginTicket.getTicket());
         return map;
     }
+
+    public Map<String,Object> forget(String email,String code,String password){
+        Map<String,Object> map=new HashMap<>();
+        //验证空值
+        if(StringUtils.isBlank(email)){
+            map.put("emailMsg","邮箱不能为空！");
+            return map;
+        }
+        //验证邮箱
+        User user=userMapper.selectByEmail(email);
+        if(user==null){
+            map.put("emailMsg","该邮箱尚未注册");
+            return map;
+        }
+        if(user.getStatus()==0){
+            map.put("emailMsg","该邮箱尚未激活！");
+        }
+
+
+        if(StringUtils.isBlank(code)){
+            map.put("codeMsg","验证码不能为空！");
+            return map;
+        }
+        String rediskey=RedisKeyUtil.getCodeKey(email);
+        String redisCode = (String) redisTemplate.opsForValue().get(rediskey);
+
+        if(redisCode==null){
+            map.put("codeMsg","验证码已过期！");
+            return map;
+        }
+        if (!redisCode.equals(code)){
+            map.put("codeMsg","验证码错误！");
+            return map;
+        }
+        if(StringUtils.isBlank(password)){
+            map.put("passwordMsg","密码不能为空！");
+            return map;
+        }
+        System.out.println(user.getId()+"\n"+password+"\n"+user.getSalt());
+        updatePassword(user.getId(),CommunityUtil.md5(password+user.getSalt()));
+        System.out.println("密码已修改！");
+        return map;
+    }
+
+    public String code(String email){
+
+        //验证验证码
+        String verifycode=CommunityUtil.generateUUID().substring(0, 5);;
+        String rediskey= RedisKeyUtil.getCodeKey(email);
+        redisTemplate.opsForValue().set(rediskey,verifycode,300, TimeUnit.SECONDS);
+
+        //发送邮件
+        Context context=new Context();
+        String name=userMapper.selectByEmail(email).getUsername();
+        context.setVariable("name",name);
+        context.setVariable("verifycode", verifycode);
+        String content=templateEngine.process("/mail/forget",context);
+        mailClient.sendMail(email,"重制密码",content);
+
+        return rediskey;
+    }
+
     public void logout(String ticket){
 //        loginTicketMapper.updateStatus(ticket,1);
         String redisKey=RedisKeyUtil.getTicketKey(ticket);
@@ -183,7 +244,13 @@ public class UserService implements CommunityConstant {
         int rows=userMapper.updateHeader(userId,headerUrl);
         clearCache(userId);
         return rows;
+    }
 
+    public int updatePassword(int userId,String password){
+//        忘记密码，修改密码
+        int rows=userMapper.updatePassword(userId,password);
+        clearCache(userId);
+        return rows;
     }
 
     public User finduserByName(String username){
@@ -206,4 +273,25 @@ public class UserService implements CommunityConstant {
         String redisKey=RedisKeyUtil.getUserKey(userId);
         redisTemplate.delete(redisKey);
     }
+
+    public Collection<? extends GrantedAuthority> getAuthorities(int userId){
+        User user=this.findUserById(userId);
+
+        List<GrantedAuthority> list = new ArrayList<>();
+        list.add(new GrantedAuthority() {
+            @Override
+            public String getAuthority() {
+                switch (user.getType()){
+                    case 1:
+                        return AUTHORITY_ADMIN;
+                    case 2:
+                        return AUTHORITY_MODERATOR;
+                    default:
+                        return AUTHORITY_USER;
+                }
+            }
+        });
+        return list;
+    }
+
 }

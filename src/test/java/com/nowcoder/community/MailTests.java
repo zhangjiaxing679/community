@@ -23,7 +23,7 @@ public class MailTests {
 
     @Test
     public void testTextMail() {
-        mailClient.sendMail("2083183413@mail.ncut.edu.cn.", "TEST", "Welcome.");
+        mailClient.sendMail("2083183413@mail.ncut.edu.cn", "TEST", "测试发邮件功能");
     }
 
     @Test

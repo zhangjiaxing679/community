@@ -1,31 +1,35 @@
 package com.nowcoder.community;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
-import co.elastic.clients.elasticsearch._types.SortOrder;
-import co.elastic.clients.elasticsearch._types.query_dsl.Query;
-import co.elastic.clients.elasticsearch.core.SearchResponse;
-import co.elastic.clients.elasticsearch.core.search.Hit;
-import co.elastic.clients.elasticsearch.core.search.HitsMetadata;
-import co.elastic.clients.elasticsearch.core.search.SourceConfigBuilders;
-import co.elastic.clients.json.jackson.JacksonJsonpMapper;
-import co.elastic.clients.transport.ElasticsearchTransport;
-import co.elastic.clients.transport.rest_client.RestClientTransport;
+
 import com.nowcoder.community.dao.DiscussPostMapper;
 import com.nowcoder.community.dao.elasticsearch.DiscussPostRepository;
 import com.nowcoder.community.entity.DiscussPost;
-import com.nowcoder.community.entity.Page;
-import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.elasticsearch.client.elc.NativeQuery;
+import org.springframework.data.domain.*;
+import org.springframework.data.elasticsearch.annotations.Highlight;
+import org.springframework.data.elasticsearch.annotations.HighlightField;
+import org.springframework.data.elasticsearch.annotations.HighlightParameters;
 import org.springframework.data.elasticsearch.client.elc.QueryBuilders;
+import org.springframework.data.elasticsearch.client.erhlc.ElasticsearchRestTemplate;
+import org.springframework.data.elasticsearch.client.erhlc.NativeSearchQueryBuilder;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.SearchHit;
+import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.query.Query;
+import org.springframework.data.elasticsearch.core.query.StringQuery;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -38,130 +42,96 @@ public class elasticsearchTests {
     @Autowired
     private DiscussPostRepository discussPostRepository;
 
-    RestClient restClient = RestClient.builder(
-            new HttpHost("localhost", 9200)).build();
-
-    // Create the transport with a Jackson mapper
-    ElasticsearchTransport transport = new RestClientTransport(
-            restClient, new JacksonJsonpMapper());
-    // And create the API client
-    ElasticsearchClient client = new ElasticsearchClient(transport);
-
-    @Test
-    public void select() throws IOException{
-        //不带高亮的搜索
-       SearchResponse<DiscussPost> searchs=client.search(s->s
-                .index("discusspost")
-               .size(100)
-                .query(q->q
-                    .term(t->t
-                            .field("title")
-                            .value(v->v.stringValue("互联网"))
-                            .field("content")
-                            .value(v->v.stringValue("互联网"))
-                    )
-                )
-                .sort(sort->sort
-                    .field(f->f
-                                .field("type")
-                                .order(SortOrder.Desc)
-                                .field("score")
-                                .order(SortOrder.Desc)
-                                .field("createTime")
-                                .order(SortOrder.Desc)))
-               .highlight(h->h
-                        .fields("title",f->f
-                                    .preTags("<em color='red'>").postTags("</em>"))
-                       .fields("content",f->f
-                               .preTags("<em color='red'>").postTags("</em>"))
-                    ), DiscussPost.class);
-        System.out.println("查询结果如下");
-
-        System.out.println(searchs.took());
-        System.out.println(searchs.hits().total().value());
-        searchs.hits().hits().forEach(e->
-                System.out.println(e.source().toString()));
-        }
-
-    @Test
-    public void highlightselect() throws IOException{
-        //带高亮的搜索
-        SearchResponse<DiscussPost> searchs=client.search(s->s
-                .index("discusspost")
-                .size(100)
-                .query(q->q
-                        .term(t->t
-                                .field("title")
-                                .value(v->v.stringValue("互联网"))
-                                .field("content")
-                                .value(v->v.stringValue("互联网"))
-                        )
-                )
-                .sort(sort->sort
-                        .field(f->f
-                                .field("type")
-                                .order(SortOrder.Desc)
-                                .field("score")
-                                .order(SortOrder.Desc)
-                                .field("createTime")
-                                .order(SortOrder.Desc)))
-                .highlight(h->h
-                        .fields("title",f->f
-                                .preTags("<em color='red'>").postTags("</em>"))
-                        .fields("content",f->f
-                                .preTags("<em color='red'>").postTags("</em>"))
-                ), DiscussPost.class);
-
-        System.out.println("查询结果如下");
-
-        System.out.println(searchs.took());
-        System.out.println(searchs.hits().total().value());
-        searchs.hits().hits().forEach(e->
-                System.out.println(e.source().toString()));
-    }
-    @Test
-    public void testget() throws IOException{
-        //查询当前索引的全部文档
-            SearchResponse<DiscussPost> searches = client.search(g -> g
-                            .index("discusspost")
-                    , DiscussPost.class);
-            HitsMetadata<DiscussPost> hits = searches.hits();
-            for (Hit<DiscussPost> hit : hits.hits()) {
-                System.out.println(hit.source());
-            }
-        }
-
     @Test
     public void testInsert() {
-        discussPostRepository.save(discussPostMapper.selectDiscussPostById(241));
-        discussPostRepository.save(discussPostMapper.selectDiscussPostById(242));
-        discussPostRepository.save(discussPostMapper.selectDiscussPostById(243));
+        discussPostRepository.save(discussPostMapper.selectDiscussPostById(273));
+        discussPostRepository.save(discussPostMapper.selectDiscussPostById(227));
+//        discussPostRepository.save(discussPostMapper.selectDiscussPostById(246));
     }
 
     @Test
     public void testInsertList() {
-        discussPostRepository.saveAll(discussPostMapper.selectDiscussPosts(101, 0, 100));
-        discussPostRepository.saveAll(discussPostMapper.selectDiscussPosts(102, 0, 100));
-        discussPostRepository.saveAll(discussPostMapper.selectDiscussPosts(103, 0, 100));
-        discussPostRepository.saveAll(discussPostMapper.selectDiscussPosts(111, 0, 100));
-        discussPostRepository.saveAll(discussPostMapper.selectDiscussPosts(112, 0, 100));
-        discussPostRepository.saveAll(discussPostMapper.selectDiscussPosts(131, 0, 100));
-        discussPostRepository.saveAll(discussPostMapper.selectDiscussPosts(132, 0, 100));
-        discussPostRepository.saveAll(discussPostMapper.selectDiscussPosts(133, 0, 100));
-        discussPostRepository.saveAll(discussPostMapper.selectDiscussPosts(134, 0, 100));
+        discussPostRepository.saveAll(discussPostMapper.selectDiscussPosts(101, 0, 100,0));
+        discussPostRepository.saveAll(discussPostMapper.selectDiscussPosts(102, 0, 100,0));
+        discussPostRepository.saveAll(discussPostMapper.selectDiscussPosts(103, 0, 100,0));
+        discussPostRepository.saveAll(discussPostMapper.selectDiscussPosts(111, 0, 100,0));
+        discussPostRepository.saveAll(discussPostMapper.selectDiscussPosts(112, 0, 100,0));
+        discussPostRepository.saveAll(discussPostMapper.selectDiscussPosts(131, 0, 100,0));
+        discussPostRepository.saveAll(discussPostMapper.selectDiscussPosts(132, 0, 100,0));
+        discussPostRepository.saveAll(discussPostMapper.selectDiscussPosts(133, 0, 100,0));
+        discussPostRepository.saveAll(discussPostMapper.selectDiscussPosts(134, 0, 100,0));
     }
 
     @Test
     public void testUpdate() {
-        DiscussPost post = discussPostMapper.selectDiscussPostById(110);
-        post.setType(2);
+        DiscussPost post = discussPostMapper.selectDiscussPostById(231);
+        post.setContent("新人不灌水");
         discussPostRepository.save(post);
     }
 
     @Test
     public void testDelete() {
-//        discussPostRepository.deleteById(231);
-        discussPostRepository.deleteAll();
+        discussPostRepository.deleteById(231);
+//        discussPostRepository.deleteAll();
+    }
+
+    @Test
+    public void testSelect() {
+        //实现查询，查询＋按照指定字段排序
+        //分页展示
+        //匹配到的内容有标签高亮展示
+        //高亮代码重写
+
+//        Query query = new StringQuery("{ \"bool\": { \"should\": [ " +
+//        "{ \"match\": { \"title\": \"哈哈\" } }, " +
+//        "{ \"match\": { \"content\": \"哈哈\" } } ] } }"
+//        );
+//        List<SearchHit<DiscussPost>> searchHits=discussPostRepository.findByTitleOrContent("互联网寒冬","互联网寒冬",pageable);
+        Sort sort = Sort.by("type").descending()
+                .and(Sort.by("score").descending())
+                .and(Sort.by("createTime").descending());
+        Pageable pageable = PageRequest.of(0, 10, sort);
+        List<SearchHit<DiscussPost>> searchHits = discussPostRepository.findByTitleOrContent("互联网寒冬", "互联网寒冬", pageable);
+
+
+// Process the searchHits content and handle highlighting
+        List<DiscussPost> posts = new ArrayList<>();
+        for (SearchHit<DiscussPost>searchHit : searchHits) {
+            DiscussPost discussPost = searchHit.getContent();
+            Map<String, List<String>> highlightFields = searchHit.getHighlightFields();
+
+            // Update title and content with highlighted values if available
+            if (highlightFields.containsKey("title")) {
+                discussPost.setTitle(highlightFields.get("title").get(0));
+            }
+            if (highlightFields.containsKey("content")) {
+                discussPost.setContent(highlightFields.get("content").get(0));
+            }
+
+            posts.add(discussPost);
+        }
+
+// Create a PageImpl from the processed posts and the total number of elements
+        Page<DiscussPost> page = new PageImpl<>(posts, pageable, searchHits.size());
+
+// Now you can work with the page object, such as accessing its content, page information, etc.
+        System.out.println("Page content: " + page.getContent());
+        System.out.println("Total elements: " + page.getTotalElements());
+        System.out.println("Total pages: " + page.getTotalPages());
+        System.out.println("Current page: " + page.getNumber());
+        System.out.println("Page size: " + page.getSize());
+
+        for (DiscussPost post : page.getContent()) {
+            System.out.println(post);
+        }
+
+//            //高亮的内容
+//            Map<String, List<String>> highlightFields = searchHit.getHighlightFields();
+//            //将高亮的内容填充到content中
+//            searchHit.getContent().setTitle(highlightFields.get("title")==null ? searchHit.getContent().getTitle():highlightFields.get("title").get(0));
+//            searchHit.getContent().setContent(highlightFields.get("content")==null ? searchHit.getContent().getContent():highlightFields.get("content").get(0));
+            //放到实体类中
+//            posts.add(searchHit.getContent());
     }
 
 }

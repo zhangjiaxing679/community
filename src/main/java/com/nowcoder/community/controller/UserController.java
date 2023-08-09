@@ -5,27 +5,27 @@ import com.nowcoder.community.entity.User;
 import com.nowcoder.community.service.FollowService;
 import com.nowcoder.community.service.LikeService;
 import com.nowcoder.community.service.UserService;
-import com.nowcoder.community.util.CommunityConstant;
-import com.nowcoder.community.util.CommunityUtil;
-import com.nowcoder.community.util.HostHolder;
+import com.nowcoder.community.util.*;
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.ibatis.annotations.Mapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
+import org.thymeleaf.TemplateEngine;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/user")
@@ -53,22 +53,37 @@ public class UserController implements CommunityConstant {
     @Autowired
     private FollowService followService;
 
+    @Autowired
+    private RedisTemplate redisTemplate;
+
+    @Autowired
+    private TemplateEngine templateEngine;
+
+    @Autowired
+    private MailClient mailClient;
+
     @LoginRequired
     @RequestMapping(path="/setting",method = RequestMethod.GET)
     public String GetSettingPage(){
         return "/site/setting";
     }
+
     @LoginRequired
     @RequestMapping(path="/upload",method = RequestMethod.POST)
     public String uploadHeader(MultipartFile headerImage, Model model){
         if(headerImage==null){
+//            map<Integer,String> map=new HashMap<>()
             model.addAttribute("error","您还没有选择图片！");
             return "/site/setting";
         }
         String filename=headerImage.getOriginalFilename();
         String suffix=filename.substring(filename.lastIndexOf("."));
-        if(StringUtils.isBlank(suffix)){
-            model.addAttribute("error","文件格式不正确！");
+
+        //限制大小，只能为500kb以下图片
+        long fileSizeInBytes = headerImage.getSize();
+        long fileSizeInKB = fileSizeInBytes / 1024; // 转换为KB
+        if(fileSizeInKB>=500){
+            model.addAttribute("error","请上传小于500KB图片！");
             return "/site/setting";
         }
         //生成随机文件名
@@ -108,6 +123,58 @@ public class UserController implements CommunityConstant {
             }
         } catch (IOException e) {
             logger.error("读取头像失败"+e.getMessage());
+        }
+    }
+
+    @RequestMapping(path="/update",method = RequestMethod.POST)
+    public String updatePassword(String oldPassword, String newPassword,String confirmPassword, Model model){
+
+        if(oldPassword==null || newPassword==null || confirmPassword==null){
+            return "/site/setting";
+        }
+
+        //判断旧密码是否正确
+        String origalPassword=hostHolder.getUser().getPassword();
+        String salt=hostHolder.getUser().getSalt();
+        String password=CommunityUtil.md5(oldPassword+salt);
+        if(!password.equals(origalPassword)){
+            model.addAttribute("oldPasswordMsg","原密码不正确！");
+            return "/site/setting";
+        }
+        //限制新密码长度至少为8位
+        if(newPassword.length()<8){
+            model.addAttribute("newPasswordMsg","密码长度不能少于8位");
+            return "/site/setting";
+        }
+        //判断新的两次密码是否一致
+        if(!newPassword.equals(confirmPassword)){
+            model.addAttribute("confirmPasswordMsg","两次输入的密码不一致");
+            return "/site/setting";
+        }
+
+        int id=hostHolder.getUser().getId();
+        userService.updatePassword(id,CommunityUtil.md5(newPassword+salt));
+
+        return "redirect:/index";
+    }
+
+    @ResponseBody
+    @RequestMapping(path="/code",method = RequestMethod.POST)
+    public void getCode(String email){
+        userService.code(email);
+    }
+
+    @RequestMapping(path="/forget",method = RequestMethod.POST)
+    public String forgetPassword(String email,String code,String password,Model model){
+        Map<String,Object> map=userService.forget(email,code,password);
+        System.out.println(map);
+
+        if(map.size()==0){
+           return  "redirect:/login";
+        }else{
+            model.addAttribute("emailMsg",map.get("emailMsg"));
+            model.addAttribute("codeMsg",map.get("codeMsg"));
+            return "/site/forget";
         }
     }
 
