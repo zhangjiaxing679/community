@@ -18,9 +18,10 @@ import java.util.Map;
 public class SensitiveFilter {
     private static  final Logger logger= LoggerFactory.getLogger(SensitiveFilter.class);
     //替换符
-    private static final String REPLACEMEBT="***";
+    private static final String REPLACEMEBT="*";
     //跟节点
     private TrieNode rootNode=new TrieNode();
+
     @PostConstruct
     public void init(){
         try (
@@ -36,6 +37,7 @@ public class SensitiveFilter {
             logger.error("加载铭感词文件失败"+e.getMessage());
         }
     }
+
     //将一个敏感词添加到前缀树中
     private void addKeyword(String keyword){
         TrieNode tempNode=rootNode;
@@ -56,6 +58,7 @@ public class SensitiveFilter {
             }
         }
     }
+
     /**
     *过滤敏感词
      * @param text 待过滤的文本
@@ -73,7 +76,7 @@ public class SensitiveFilter {
         int position=0;
         //结果
         StringBuilder sb=new StringBuilder();
-        while (position<text.length()){
+        while (position < text.length() ){
             char c=text.charAt(position);
             //跳过符号
             if(isSymbol(c)){
@@ -92,28 +95,27 @@ public class SensitiveFilter {
                 //以begin开头的字符串不是敏感词
                 sb.append(text.charAt(begin));
                 //键入下一个位置
-                position=++begin;
+                position= ++begin;
                 //重新指向根节点
                 tempNode=rootNode;
             }else if(tempNode.isKeywordEnd()){
                 //发现敏感词，将begin~position字符串替换掉
                 sb.append(REPLACEMEBT);
                 //进入下一个位置
-                begin=++position;
+                begin = ++position;
                 //重新指向根节点
                 tempNode=rootNode;
             }else{
                 //检查下一个字符
-                position++;
+                    position++;
             }
         }
-        //将最后一批字符计入结果
         sb.append(text.substring(begin));
         return sb.toString();
     }
     //判断是否为符号
     private boolean isSymbol(Character c){
-        return !CharUtils.isAsciiAlphanumeric(c) && (c<0x2E80 || c>0x9FFFF);
+        return !CharUtils.isAsciiAlphanumeric(c) && (c < 0x2E80 || c > 0x9FFFF);
     }
     //前缀树
     private class TrieNode{

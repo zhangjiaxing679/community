@@ -34,6 +34,7 @@ public class HomeController implements CommunityConstant {
     public String root() {
         return "forward:/index";
     }
+
     @RequestMapping(path="/index",method = RequestMethod.GET)
     public String getIndexPage(Model model, Page page, @RequestParam(name = "orderMode",defaultValue = "0") int orderMode){
         //方法调用之前，SpringMVC会自动实例化Model和Page,并讲Page注入Model

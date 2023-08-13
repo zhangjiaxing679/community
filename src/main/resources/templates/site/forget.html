@@ -64,7 +64,7 @@
 			<div class="container pl-5 pr-5 pt-3 pb-3 mt-3 mb-3">
 				<form class="mt-5" method="post" th:action="@{/user/forget}">
 					<div class="form-group row">
-						<label for="your-email" class="|col-sm-2 col-form-label text-right">邮箱:</label>
+						<label for="your-email" class="col-sm-2 col-form-label text-right">邮箱:</label>
 						<div class="col-sm-10">
 							<input type="email" th:class="|form-control ${emailMsg!=null?'is-invalid':''}|"
 								   id="your-email" th:value="${param.email}" name="email" placeholder="请输入您的邮箱!" required>

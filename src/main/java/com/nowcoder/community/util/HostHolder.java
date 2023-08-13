@@ -22,6 +22,7 @@ public class HostHolder {
     public void clear(){
         users.remove();
     }
+
 //打印用户
     @Override
     public String toString() {
