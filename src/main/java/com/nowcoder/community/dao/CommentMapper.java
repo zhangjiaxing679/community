@@ -1,6 +1,7 @@
 package com.nowcoder.community.dao;
 
 import com.nowcoder.community.entity.Comment;
+import jakarta.validation.constraints.NotEmpty;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -17,7 +18,8 @@ public interface CommentMapper {
 
     int selectCountByUserId(int entityType, int userId);
 
-    List<Comment> selectCommentByUserId(int entityType, int userId,int offset,int limit);
-
     List<Comment> selectCommentsByUserId(int entityType, int userId, int offset, int limit);
+
+    // 尝试关联查询
+    List<Comment> selectComments(int userId);
 }

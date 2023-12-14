@@ -23,6 +23,7 @@ public class LikeService {
                 String entityLikeKey= RedisKeyUtil.getEntityLikeLey(entityType,entityId);
                 String userLikeKey = RedisKeyUtil.getUserLikeKey(entityUserId);
 
+                //判断key中是否含有userId(是否已点赞）
                 boolean isMember=operations.opsForSet().isMember(entityLikeKey,userId);
 
                 operations.multi();

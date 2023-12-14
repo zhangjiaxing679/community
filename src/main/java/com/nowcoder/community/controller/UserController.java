@@ -75,7 +75,7 @@ public class UserController implements CommunityConstant {
     @LoginRequired
     @RequestMapping(path="/setting",method = RequestMethod.GET)
     public String GetSettingPage(){
-        return "/site/setting";
+        return "site/setting";
     }
 
     @LoginRequired
@@ -84,7 +84,7 @@ public class UserController implements CommunityConstant {
         if(headerImage==null){
 //            map<Integer,String> map=new HashMap<>()
             model.addAttribute("error","您还没有选择图片！");
-            return "/site/setting";
+            return "site/setting";
         }
         String filename=headerImage.getOriginalFilename();
         String suffix=filename.substring(filename.lastIndexOf("."));
@@ -94,7 +94,7 @@ public class UserController implements CommunityConstant {
         long fileSizeInKB = fileSizeInBytes / 1024; // 转换为KB
         if(fileSizeInKB>=500){
             model.addAttribute("error","请上传小于500KB图片！");
-            return "/site/setting";
+            return "site/setting";
         }
         //生成随机文件名
         filename= CommunityUtil.generateUUID()+suffix;
@@ -140,7 +140,7 @@ public class UserController implements CommunityConstant {
     public String updatePassword(String oldPassword, String newPassword,String confirmPassword, Model model){
 
         if(oldPassword==null || newPassword==null || confirmPassword==null){
-            return "/site/setting";
+            return "site/setting";
         }
 
         //判断旧密码是否正确
@@ -149,17 +149,17 @@ public class UserController implements CommunityConstant {
         String password=CommunityUtil.md5(oldPassword+salt);
         if(!password.equals(origalPassword)){
             model.addAttribute("oldPasswordMsg","原密码不正确！");
-            return "/site/setting";
+            return "site/setting";
         }
         //限制新密码长度至少为8位
         if(newPassword.length()<8){
             model.addAttribute("newPasswordMsg","密码长度不能少于8位");
-            return "/site/setting";
+            return "site/setting";
         }
         //判断新的两次密码是否一致
         if(!newPassword.equals(confirmPassword)){
             model.addAttribute("confirmPasswordMsg","两次输入的密码不一致");
-            return "/site/setting";
+            return "site/setting";
         }
 
         int id=hostHolder.getUser().getId();
@@ -184,7 +184,7 @@ public class UserController implements CommunityConstant {
         }else{
             model.addAttribute("emailMsg",map.get("emailMsg"));
             model.addAttribute("codeMsg",map.get("codeMsg"));
-            return "/site/forget";
+            return "site/forget";
         }
     }
 
@@ -215,7 +215,7 @@ public class UserController implements CommunityConstant {
         }
         model.addAttribute("hasFollowed",hasFollowed);
 
-        return "/site/profile";
+        return "site/profile";
     }
 
     //我的帖子
@@ -250,7 +250,7 @@ public class UserController implements CommunityConstant {
         }
 
         model.addAttribute("discussPosts",discussPosts);
-        return "/site/my-post";
+        return "site/my-post";
     }
 
     //我的回复
@@ -270,7 +270,8 @@ public class UserController implements CommunityConstant {
         page.setRows(discussPostRows);
 
         //帖子
-        List<Comment> list = commentService.findCommentByUserId(1,userId,page.getOffset(),page.getLimit());
+        List<Comment> list = commentService.findCommentByUserId(
+                1,userId,page.getOffset(),page.getLimit());
         List<Map<String,Object>> discussPosts=new ArrayList<>();
         if(list != null) {
             for (Comment comment:list) {
@@ -286,7 +287,7 @@ public class UserController implements CommunityConstant {
         }
 
         model.addAttribute("discussPosts",discussPosts);
-        return "/site/my-reply";
+        return "site/my-reply";
     }
 
 }

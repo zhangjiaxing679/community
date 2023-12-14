@@ -1,14 +1,7 @@
 package com.nowcoder.community;
 
-import com.nowcoder.community.dao.DiscussPostMapper;
-import com.nowcoder.community.dao.LoginTicketMapper;
-import com.nowcoder.community.dao.MessageMapper;
-import com.nowcoder.community.dao.UserMapper;
-import com.nowcoder.community.entity.DiscussPost;
-import com.nowcoder.community.entity.LoginTicket;
-import com.nowcoder.community.entity.Message;
-import com.nowcoder.community.entity.User;
-import org.apache.ibatis.annotations.Mapper;
+import com.nowcoder.community.dao.*;
+import com.nowcoder.community.entity.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mybatis.spring.annotation.MapperScan;
@@ -38,6 +31,9 @@ public class MapperTests {
 
     @Autowired
     private MessageMapper messageMapper;
+
+    @Autowired
+    private CommentMapper commentMapper;
 
     @Test
     public void testSelectUser(){
@@ -87,6 +83,21 @@ public class MapperTests {
     }
 
     @Test
+    public void testInsertComment() {
+        Comment comment =new Comment();
+
+        comment.setUserId(666);
+        comment.setEntityType(666);
+        comment.setEntityId(666);
+        String s = null;
+        comment.setContent(s);
+        comment.setStatus(666);
+        comment.setCreateTime(new Date());
+        commentMapper.insertComment(comment);
+        System.out.println("success");
+    }
+
+    @Test
     public void testInsertLoginTicket(){
         LoginTicket loginTicket=new LoginTicket();
         loginTicket.setUserId(101);
@@ -127,6 +138,14 @@ public class MapperTests {
 
         count=messageMapper.selectLetterUnreadCount(131,"111_131");
         System.out.println(count);
+    }
+
+    @Test
+    public void testSelectComment() {
+        List<Comment> comments = commentMapper.selectComments(111);
+        for(Comment comment : comments) {
+            System.out.println(comment);
+        }
     }
 
 }

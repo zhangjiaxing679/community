@@ -59,16 +59,16 @@ public class HomeController implements CommunityConstant {
         }
         model.addAttribute("discussPosts",discussPosts);
         model.addAttribute("orderMode",orderMode);
-        return "/index";
+        return "index";
     }
 
     @RequestMapping(path="/error",method = RequestMethod.GET)
     public String getErrorPage(){
-        return "/error/500";
+        return "error/500";
     }
 
-    @RequestMapping(path="denied",method = RequestMethod.GET)
+    @RequestMapping(path="/denied",method = RequestMethod.GET)
     public String getDeniedPage(){
-        return "/error/404";
+        return "error/404";
     }
 }

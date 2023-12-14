@@ -118,6 +118,8 @@ public class RedisTests {
             @Override
             public Object execute(RedisOperations operations) throws DataAccessException {
                 String redisKey="test:tx";
+
+                //启用事务
                 operations.multi();
 
                 operations.opsForSet().add(redisKey,"zhangsan");
@@ -125,6 +127,8 @@ public class RedisTests {
                 operations.opsForSet().add(redisKey,"wangwu");
 
                 System.out.println(operations.opsForSet().members(redisKey));
+
+                //提交事务
                 return operations.exec();
             }
         });

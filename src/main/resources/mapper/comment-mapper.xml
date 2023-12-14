@@ -58,4 +58,26 @@
         where id=#{id}
     </select>
 
+    <resultMap type="Comment" id="CommentResultMap">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="entity_type" property="entityType"/>
+        <result column="entity_id" property="entityId"/>
+        <result column="target_id" property="targetId"/>
+        <result column="content" property="content"/>
+        <result column="status" property="status"/>
+        <result column="create_time" property="createTime"/>
+        <association property="id" javaType="user">
+
+        </association>
+    </resultMap>
+
+    <select id="selectComments"  resultMap="CommentResultMap">
+        select
+        c.id,user_id,entity_type,entity_id,target_id,content,c.status,c.create_time
+        from comment c, user u
+        where c.user_id = u.id
+        and c.user_id =#{userId}
+    </select>
+
 </mapper>

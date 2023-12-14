@@ -67,7 +67,7 @@ MessageController implements CommunityConstant {
         int noticeUnreadCount = messageService.findNoticeUnreadCount(user.getId(), null);
         model.addAttribute("noticeUnreadCount", noticeUnreadCount);
 
-        return "/site/letter";
+        return "site/letter";
     }
 
     @RequestMapping(path = "/letter/detail/{conversationId}", method = RequestMethod.GET)
@@ -97,7 +97,7 @@ MessageController implements CommunityConstant {
         if (!ids.isEmpty()) {
             messageService.readMessage(ids);
         }
-        return "/site/letter-detail";
+        return "site/letter-detail";
 
     }
 
@@ -129,7 +129,7 @@ MessageController implements CommunityConstant {
     @RequestMapping(path = "/letter/send", method = RequestMethod.POST)
     @ResponseBody
     public String sendLetter(String toName, String content) {
-        User target = userService.finduserByName(toName);
+        User target = userService.findUserByName(toName);
         if (target == null) {
             return CommunityUtil.getJSONString(1, "目标用户不存在");
         }
@@ -223,7 +223,7 @@ MessageController implements CommunityConstant {
         int noticeUnreadCount = messageService.findNoticeUnreadCount(user.getId(), null);
         model.addAttribute("noticeUnreadCount", noticeUnreadCount);
 
-        return "/site/notice";
+        return "site/notice";
     }
 
     @RequestMapping(path = "/notice/detail/{topic}", method = RequestMethod.GET)
@@ -261,7 +261,7 @@ MessageController implements CommunityConstant {
         if (!ids.isEmpty()) {
             messageService.readMessage(ids);
         }
-        return "/site/notice-detail";
+        return "site/notice-detail";
     }
 
 }

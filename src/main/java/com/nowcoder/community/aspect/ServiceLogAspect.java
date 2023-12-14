@@ -17,6 +17,7 @@ import java.util.Date;
 
 @Component
 @Aspect
+// 切面Aspect
 public class ServiceLogAspect {
 
     private static final Logger logger = LoggerFactory.getLogger(ServiceLogAspect.class);
@@ -26,6 +27,7 @@ public class ServiceLogAspect {
 
     }
 
+    // 通知Advice
     @Before("pointcut()")
     public void before(JoinPoint joinPoint) {
         // 用户[1.2.3.4],在[xxx],访问了[com.nowcoder.community.service.xxx()].
