@@ -34,7 +34,7 @@ import java.util.Map;
 @Controller
 @RequestMapping("/user")
 public class UserController implements CommunityConstant {
-    private static final Logger logger= LoggerFactory.getLogger(UserController.class);
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     @Value("${community.path.upload}")
     private String uploadPath;
@@ -73,161 +73,161 @@ public class UserController implements CommunityConstant {
     private CommentService commentService;
 
     @LoginRequired
-    @RequestMapping(path="/setting",method = RequestMethod.GET)
-    public String GetSettingPage(){
+    @RequestMapping(path = "/setting", method = RequestMethod.GET)
+    public String GetSettingPage() {
         return "site/setting";
     }
 
     @LoginRequired
-    @RequestMapping(path="/upload",method = RequestMethod.POST)
-    public String uploadHeader(MultipartFile headerImage, Model model){
-        if(headerImage==null){
+    @RequestMapping(path = "/upload", method = RequestMethod.POST)
+    public String uploadHeader(MultipartFile headerImage, Model model) {
+        if (headerImage == null) {
 //            map<Integer,String> map=new HashMap<>()
-            model.addAttribute("error","您还没有选择图片！");
+            model.addAttribute("error", "您还没有选择图片！");
             return "site/setting";
         }
-        String filename=headerImage.getOriginalFilename();
-        String suffix=filename.substring(filename.lastIndexOf("."));
+        String filename = headerImage.getOriginalFilename();
+        String suffix = filename.substring(filename.lastIndexOf("."));
 
         //限制大小，只能为500kb以下图片
         long fileSizeInBytes = headerImage.getSize();
         long fileSizeInKB = fileSizeInBytes / 1024; // 转换为KB
-        if(fileSizeInKB>=500){
-            model.addAttribute("error","请上传小于500KB图片！");
+        if (fileSizeInKB >= 500) {
+            model.addAttribute("error", "请上传小于500KB图片！");
             return "site/setting";
         }
         //生成随机文件名
-        filename= CommunityUtil.generateUUID()+suffix;
+        filename = CommunityUtil.generateUUID() + suffix;
         //确定文件存放的路径
-        File dest=new File(uploadPath+"/"+filename);
+        File dest = new File(uploadPath + "/" + filename);
         try {
             headerImage.transferTo(dest);
         } catch (IOException e) {
-            logger.error("上传文件失败"+e.getMessage());
-            throw new RuntimeException("上传文件失败，服务器发生异常！",e);
+            logger.error("上传文件失败" + e.getMessage());
+            throw new RuntimeException("上传文件失败，服务器发生异常！", e);
         }
         //更新当前用户头像的路径（web访问路径）
-        User user=hostHolder.getUser();
-        String headerUrl=domain+contextPath+"/user/header/"+filename;
-        userService.updateHeader(user.getId(),headerUrl);
+        User user = hostHolder.getUser();
+        String headerUrl = domain + contextPath + "/user/header/" + filename;
+        userService.updateHeader(user.getId(), headerUrl);
 
         return "redirect:/index";
     }
 
-    @RequestMapping(path="/header/{filename}",method = RequestMethod.GET)
-    public void getHeader(@PathVariable("filename")String filename, HttpServletResponse response){
+    @RequestMapping(path = "/header/{filename}", method = RequestMethod.GET)
+    public void getHeader(@PathVariable("filename") String filename, HttpServletResponse response) {
         //服务器存放路径
-        filename=uploadPath+"/"+filename;
+        filename = uploadPath + "/" + filename;
         //文件后缀
-        String suffix=filename.substring(filename.lastIndexOf("."));
+        String suffix = filename.substring(filename.lastIndexOf("."));
         //响应图片
-        response.setContentType("image/"+suffix);
+        response.setContentType("image/" + suffix);
         try (
-                FileInputStream fis=new FileInputStream(filename);
-                OutputStream os=response.getOutputStream();
-                ){
-            byte[] buffer=new byte[1024];
-            int b=0;
-            while((b=fis.read(buffer))!=-1){
-                os.write(buffer,0,b);
+                FileInputStream fis = new FileInputStream(filename);
+                OutputStream os = response.getOutputStream();
+        ) {
+            byte[] buffer = new byte[1024];
+            int b = 0;
+            while ((b = fis.read(buffer)) != -1) {
+                os.write(buffer, 0, b);
             }
         } catch (IOException e) {
-            logger.error("读取头像失败"+e.getMessage());
+            logger.error("读取头像失败" + e.getMessage());
         }
     }
 
-    @RequestMapping(path="/update",method = RequestMethod.POST)
-    public String updatePassword(String oldPassword, String newPassword,String confirmPassword, Model model){
+    @RequestMapping(path = "/update", method = RequestMethod.POST)
+    public String updatePassword(String oldPassword, String newPassword, String confirmPassword, Model model) {
 
-        if(oldPassword==null || newPassword==null || confirmPassword==null){
+        if (oldPassword == null || newPassword == null || confirmPassword == null) {
             return "site/setting";
         }
 
         //判断旧密码是否正确
-        String origalPassword=hostHolder.getUser().getPassword();
-        String salt=hostHolder.getUser().getSalt();
-        String password=CommunityUtil.md5(oldPassword+salt);
-        if(!password.equals(origalPassword)){
-            model.addAttribute("oldPasswordMsg","原密码不正确！");
+        String origalPassword = hostHolder.getUser().getPassword();
+        String salt = hostHolder.getUser().getSalt();
+        String password = CommunityUtil.md5(oldPassword + salt);
+        if (!password.equals(origalPassword)) {
+            model.addAttribute("oldPasswordMsg", "原密码不正确！");
             return "site/setting";
         }
         //限制新密码长度至少为8位
-        if(newPassword.length()<8){
-            model.addAttribute("newPasswordMsg","密码长度不能少于8位");
+        if (newPassword.length() < 8) {
+            model.addAttribute("newPasswordMsg", "密码长度不能少于8位");
             return "site/setting";
         }
         //判断新的两次密码是否一致
-        if(!newPassword.equals(confirmPassword)){
-            model.addAttribute("confirmPasswordMsg","两次输入的密码不一致");
+        if (!newPassword.equals(confirmPassword)) {
+            model.addAttribute("confirmPasswordMsg", "两次输入的密码不一致");
             return "site/setting";
         }
 
-        int id=hostHolder.getUser().getId();
-        userService.updatePassword(id,CommunityUtil.md5(newPassword+salt));
+        int id = hostHolder.getUser().getId();
+        userService.updatePassword(id, CommunityUtil.md5(newPassword + salt));
 
         return "redirect:/index";
     }
 
     @ResponseBody
-    @RequestMapping(path="/code",method = RequestMethod.POST)
-    public void getCode(String email){
+    @RequestMapping(path = "/code", method = RequestMethod.POST)
+    public void getCode(String email) {
         userService.code(email);
     }
 
-    @RequestMapping(path="/forget",method = RequestMethod.POST)
-    public String forgetPassword(String email,String code,String password,Model model){
-        Map<String,Object> map=userService.forget(email,code,password);
+    @RequestMapping(path = "/forget", method = RequestMethod.POST)
+    public String forgetPassword(String email, String code, String password, Model model) {
+        Map<String, Object> map = userService.forget(email, code, password);
         System.out.println(map);
 
-        if(map.size()==0){
-           return  "redirect:/login";
-        }else{
-            model.addAttribute("emailMsg",map.get("emailMsg"));
-            model.addAttribute("codeMsg",map.get("codeMsg"));
+        if (map.size() == 0) {
+            return "redirect:/login";
+        } else {
+            model.addAttribute("emailMsg", map.get("emailMsg"));
+            model.addAttribute("codeMsg", map.get("codeMsg"));
             return "site/forget";
         }
     }
 
     //个人主页
-    @RequestMapping(path="/profile/{userId}",method = RequestMethod.GET)
-    public String getProfilePage(@PathVariable("userId") int userId,Model model){
-        User user=userService.findUserById(userId);
-        if(user==null){
+    @RequestMapping(path = "/profile/{userId}", method = RequestMethod.GET)
+    public String getProfilePage(@PathVariable("userId") int userId, Model model) {
+        User user = userService.findUserById(userId);
+        if (user == null) {
             throw new RuntimeException("该用户不存在");
         }
 
         //用户
-        model.addAttribute("user",user);
+        model.addAttribute("user", user);
         //点赞数量
-        int likeCount=likeService.findUserLikeCount(userId);
-        model.addAttribute("likeCount",likeCount);
+        int likeCount = likeService.findUserLikeCount(userId);
+        model.addAttribute("likeCount", likeCount);
 
         //关注数量
-        long followeeCount=followService.findFolloweeCount(userId,ENTITY_TYPE_USER);
-        model.addAttribute("followeeCount",followeeCount);
+        long followeeCount = followService.findFolloweeCount(userId, ENTITY_TYPE_USER);
+        model.addAttribute("followeeCount", followeeCount);
         //粉丝数量
-        long followerCount=followService.findFollowerCount(ENTITY_TYPE_USER,userId);
-        model.addAttribute("followerCount",followerCount);
+        long followerCount = followService.findFollowerCount(ENTITY_TYPE_USER, userId);
+        model.addAttribute("followerCount", followerCount);
         //是否已关注
-        boolean hasFollowed=false;
-        if(hostHolder.getUser()!=null){
-            hasFollowed=followService.hasFollowed(hostHolder.getUser().getId(),ENTITY_TYPE_USER,userId);
+        boolean hasFollowed = false;
+        if (hostHolder.getUser() != null) {
+            hasFollowed = followService.hasFollowed(hostHolder.getUser().getId(), ENTITY_TYPE_USER, userId);
         }
-        model.addAttribute("hasFollowed",hasFollowed);
+        model.addAttribute("hasFollowed", hasFollowed);
 
         return "site/profile";
     }
 
     //我的帖子
-    @RequestMapping(path="/mypost",method = RequestMethod.GET)
+    @RequestMapping(path = "/mypost", method = RequestMethod.GET)
     public String getMyPost(Model model, Page page) {
-        User user=hostHolder.getUser();
-        int userId=user.getId();
-        model.addAttribute("userId",userId);
+        User user = hostHolder.getUser();
+        int userId = user.getId();
+        model.addAttribute("userId", userId);
 
         //帖子总数
         int discussPostRows = discussPostService.findDiscussPostRows(userId);
-        model.addAttribute("discussPostRows",discussPostRows);
+        model.addAttribute("discussPostRows", discussPostRows);
 
         //分页信息
         page.setLimit(5);
@@ -237,32 +237,32 @@ public class UserController implements CommunityConstant {
         //帖子
         List<DiscussPost> list = discussPostService.findDiscussPosts(
                 userId, page.getOffset(), page.getLimit(), 0);
-        List<Map<String,Object>> discussPosts=new ArrayList<>();
-        if(list!=null){
-            for(DiscussPost post:list){
-                Map<String,Object> map=new HashMap<>();
-                map.put("post",post);
-                long likeCount=likeService.findEntityLikeCount(ENTITY_TYPE_POST, post.getId());
-                map.put("likeCount",likeCount);
+        List<Map<String, Object>> discussPosts = new ArrayList<>();
+        if (list != null) {
+            for (DiscussPost post : list) {
+                Map<String, Object> map = new HashMap<>();
+                map.put("post", post);
+                long likeCount = likeService.findEntityLikeCount(ENTITY_TYPE_POST, post.getId());
+                map.put("likeCount", likeCount);
 
                 discussPosts.add(map);
             }
         }
 
-        model.addAttribute("discussPosts",discussPosts);
+        model.addAttribute("discussPosts", discussPosts);
         return "site/my-post";
     }
 
     //我的回复
-    @RequestMapping(path="/myreply",method = RequestMethod.GET)
+    @RequestMapping(path = "/myreply", method = RequestMethod.GET)
     public String getMyReply(Model model, Page page) {
-        User user=hostHolder.getUser();
-        int userId=user.getId();
-        model.addAttribute("userId",userId);
+        User user = hostHolder.getUser();
+        int userId = user.getId();
+        model.addAttribute("userId", userId);
 
         //帖子总数
-        int discussPostRows = commentService.findCommentCounts(1,userId);
-        model.addAttribute("discussPostRows",discussPostRows);
+        int discussPostRows = commentService.findCommentCounts(1, userId);
+        model.addAttribute("discussPostRows", discussPostRows);
 
         //分页信息
         page.setLimit(5);
@@ -271,14 +271,14 @@ public class UserController implements CommunityConstant {
 
         //帖子
         List<Comment> list = commentService.findCommentByUserId(
-                1,userId,page.getOffset(),page.getLimit());
-        List<Map<String,Object>> discussPosts=new ArrayList<>();
-        if(list != null) {
-            for (Comment comment:list) {
-                int postId=comment.getEntityId();
-                Map<String,Object> map=new HashMap<>();
-                DiscussPost post=discussPostService.findDiscussPostById(postId);
-                map.put("post",post);
+                1, userId, page.getOffset(), page.getLimit());
+        List<Map<String, Object>> discussPosts = new ArrayList<>();
+        if (list != null) {
+            for (Comment comment : list) {
+                int postId = comment.getEntityId();
+                Map<String, Object> map = new HashMap<>();
+                DiscussPost post = discussPostService.findDiscussPostById(postId);
+                map.put("post", post);
 
                 discussPosts.add(map);
 
@@ -286,7 +286,7 @@ public class UserController implements CommunityConstant {
 
         }
 
-        model.addAttribute("discussPosts",discussPosts);
+        model.addAttribute("discussPosts", discussPosts);
         return "site/my-reply";
     }
 
