@@ -1,6 +1,7 @@
 package com.nowcoder.community.entity;
 
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.util.Date;
@@ -13,7 +14,7 @@ public class Comment {
     private int entityId;
     private int targetId;
 
-//    @NotEmpty(message = "内容不能为空")
+//    @NotNull(message = "评论内容为空")
     private String content;
     private int status;
     private Date createTime;

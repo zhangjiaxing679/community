@@ -4,6 +4,7 @@ $(function (){
     $("#deleteBtn").click(setDelete);
 });
 
+// 点赞
 function like(btn,entityType,entityId,entityUserId,postId){
     $.post(
         CONTEXT_PATH+"/like",

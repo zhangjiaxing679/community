@@ -14,8 +14,8 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
+
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -44,16 +44,14 @@ public class CommentController implements CommunityConstant {
 
     @RequestMapping(path = "/add/{discussPostId}", method = RequestMethod.POST)
     public String addComment(@PathVariable("discussPostId") int discussPostId,
-//                             @RequestBody @Valid
                              Comment comment
-//                             BindingResult bindingResult
-    ) {
+    )
+    {
+
         comment.setUserId(hostHolder.getUser().getId());
         comment.setStatus(0);
         comment.setCreateTime(new Date());
-//        if (bindingResult.hasErrors()) {
-//            return CommunityUtil.getJSONString(1,bindingResult.getAllErrors().toString());
-//        }
+
         commentService.addComment(comment);
         //触发评论事件
         Event event = new Event()

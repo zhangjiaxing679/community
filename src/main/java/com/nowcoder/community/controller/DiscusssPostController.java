@@ -10,10 +10,12 @@ import com.nowcoder.community.util.CommunityConstant;
 import com.nowcoder.community.util.CommunityUtil;
 import com.nowcoder.community.util.HostHolder;
 import com.nowcoder.community.util.RedisKeyUtil;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -47,11 +49,14 @@ public class DiscusssPostController implements CommunityConstant{
 
         @RequestMapping(path="/add",method = RequestMethod.POST)
         @ResponseBody
-        public String addDiscussPost(String title,String content){
+        public String addDiscussPost(String title, String content){
             User user=hostHolder.getUser();
             if(user==null){
                 return CommunityUtil.getJSONString(403,"还没有登录");
             }
+//            if(results.hasErrors()){
+//                return results.getFieldError().getDefaultMessage();
+//            }
             DiscussPost post=new DiscussPost();
             post.setUserId(user.getId());
             post.setTitle(title);
