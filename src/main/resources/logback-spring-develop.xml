@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <contextName>community</contextName>
-    <property name="LOG_PATH" value="D:/logdata"/>
-    <property name="APPDIR" value="community"/>
+    <property name="LOG_PATH" value="D:/data/community"/>
+    <property name="APPDIR" value="log"/>
 
     <!-- error file -->
     <appender name="FILE_ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">

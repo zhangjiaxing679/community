@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 
+import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -43,10 +44,14 @@ public class CommentController implements CommunityConstant {
     private RedisTemplate redisTemplate;
 
     @RequestMapping(path = "/add/{discussPostId}", method = RequestMethod.POST)
-    public String addComment(@PathVariable("discussPostId") int discussPostId,
+    public String addComment(Model model, @PathVariable("discussPostId") int discussPostId,
                              Comment comment
     )
     {
+        if (comment == null) {
+            model.addAttribute("error", "评论内容不能为空");
+            return "site:/discuss-detail";
+        }
 
         comment.setUserId(hostHolder.getUser().getId());
         comment.setStatus(0);

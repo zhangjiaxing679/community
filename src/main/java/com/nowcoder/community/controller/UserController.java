@@ -81,11 +81,7 @@ public class UserController implements CommunityConstant {
     @LoginRequired
     @RequestMapping(path = "/upload", method = RequestMethod.POST)
     public String uploadHeader(MultipartFile headerImage, Model model) {
-        if (headerImage == null) {
-//            map<Integer,String> map=new HashMap<>()
-            model.addAttribute("error", "您还没有选择图片！");
-            return "site/setting";
-        }
+
         String filename = headerImage.getOriginalFilename();
         String suffix = filename.substring(filename.lastIndexOf("."));
 
@@ -93,7 +89,7 @@ public class UserController implements CommunityConstant {
         long fileSizeInBytes = headerImage.getSize();
         long fileSizeInKB = fileSizeInBytes / 1024; // 转换为KB
         if (fileSizeInKB >= 500) {
-            model.addAttribute("error", "请上传小于500KB图片！");
+            model.addAttribute("errorInfo", "请上传小于500KB图片！");
             return "site/setting";
         }
         //生成随机文件名
@@ -152,8 +148,9 @@ public class UserController implements CommunityConstant {
             return "site/setting";
         }
         //限制新密码长度至少为8位
-        if (newPassword.length() < 8) {
-            model.addAttribute("newPasswordMsg", "密码长度不能少于8位");
+        String message = FieldUtil.fieldCheck(newPassword);
+        if (message != null) {
+            model.addAttribute("newPasswordMsg", message);
             return "site/setting";
         }
         //判断新的两次密码是否一致

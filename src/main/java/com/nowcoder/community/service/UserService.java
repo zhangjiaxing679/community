@@ -4,10 +4,7 @@ import com.nowcoder.community.dao.LoginTicketMapper;
 import com.nowcoder.community.dao.UserMapper;
 import com.nowcoder.community.entity.LoginTicket;
 import com.nowcoder.community.entity.User;
-import com.nowcoder.community.util.CommunityConstant;
-import com.nowcoder.community.util.CommunityUtil;
-import com.nowcoder.community.util.MailClient;
-import com.nowcoder.community.util.RedisKeyUtil;
+import com.nowcoder.community.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tomcat.util.http.HeaderUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,22 +52,6 @@ public class UserService implements CommunityConstant {
 
     public Map<String, Object> register(User user) {
         Map<String, Object> map = new HashMap<>();
-        //对空值处理
-        if (user == null) {
-            throw new IllegalArgumentException("参数不能为空");
-        }
-        if (StringUtils.isBlank(user.getUsername())) {
-            map.put("usernameMsg", "账号不能为空！");
-            return map;
-        }
-        if (StringUtils.isBlank((user.getPassword()))) {
-            map.put("passwordMsg", "密码不能为空！");
-            return map;
-        }
-        if (StringUtils.isBlank((user.getEmail()))) {
-            map.put("emailMsg", "邮箱不能为空！");
-            return map;
-        }
         //验证账号
         User u = userMapper.selectByName(user.getUsername());
         if (u != null) {
@@ -78,11 +59,11 @@ public class UserService implements CommunityConstant {
             return map;
         }
 //        //验证密码
-//        u=userMapper.selectByName(user.getUsername());
-//        if(u!=null ){
-//            map.put("usernameMsg","该账号已存在");
-//            return map;
-//        }
+        String passwordMsg = FieldUtil.fieldCheck(user.getPassword());
+        if(passwordMsg !=null ){
+            map.put("passwordMsg",passwordMsg);
+            return map;
+        }
         //验证邮箱
         u = userMapper.selectByEmail(user.getEmail());
         if (u != null) {
@@ -198,8 +179,9 @@ public class UserService implements CommunityConstant {
             map.put("codeMsg", "验证码错误！");
             return map;
         }
-        if (StringUtils.isBlank(password)) {
-            map.put("passwordMsg", "密码不能为空！");
+        String passwordMsg = FieldUtil.fieldCheck(password);
+        if (passwordMsg != null) {
+            map.put("passwordMsg", passwordMsg);
             return map;
         }
         System.out.println(user.getId() + "\n" + password + "\n" + user.getSalt());

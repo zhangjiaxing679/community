@@ -75,7 +75,7 @@
 						<button type="button" class="btn btn-danger btn-sm" id="wonderfulBtn"
 								th:disabled="${post.status==1}" sec:authorize="hasAnyAuthority('moderator')">加精</button>
 						<button type="button" class="btn btn-danger btn-sm" id="deleteBtn"
-								th:disabled="${post.status==2}" sec:authorize="hasAnyAuthority('admin')">删除</button>
+								th:disabled="${post.status==2}" th:if="${loginUser.id==post.userId}">删除</button>
 					</div>
 				</h6>
 				<!-- 作者 -->
@@ -174,7 +174,7 @@
 										<div th:id="|huifu-${rvoStat.count}|" class="mt-4 collapse">
 											<form method="post" th:action="@{|/comment/add/${post.id}|}">
 												<div>
-													<input type="text" class="input-size" name="content" th:placeholder="|回复${rvo.user.username}|"/>
+													<input type="text" class="input-size" name="content" th:placeholder="|回复${rvo.user.username}|" required/>
 													<input type="hidden" name="entityType" value="2">
 													<input type="hidden" name="entityId" th:value="${cvo.comment.id}">
 													<input type="hidden" name="targetId" th:value="${rvo.user.id}">
@@ -191,7 +191,7 @@
 								<li class="pb-3 pt-3">
 									<form method="post" th:action="@{|/comment/add/${post.id}|}">
 										<div>
-											<input type="text" class="input-size" name="content" placeholder="请输入你的观点"/>
+											<input type="text" class="input-size" name="content" placeholder="请输入你的观点" required/>
 											<input type="hidden" name="entityType" value="2">
 											<input type="hidden" name="entityId" th:value="${cvo.comment.id}">
 										</div>
@@ -224,7 +224,7 @@
 				<form class="replyform" method="post" th:action="@{|/comment/add/${post.id}|}">
 					<p class="mt-3">
 						<a name="replyform"></a>
-						<textarea placeholder="在这里畅所欲言你的看法吧!" name="content"></textarea>
+						<textarea placeholder="在这里畅所欲言你的看法吧!" name="content" required></textarea>
 						<input type="hidden" name="entityType" value="1">
 						<input type="hidden" name="entityId" th:value="${post.id}">
 					</p>

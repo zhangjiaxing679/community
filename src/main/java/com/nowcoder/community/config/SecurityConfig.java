@@ -54,18 +54,20 @@ public class SecurityConfig implements CommunityConstant {
                         "/notice/**",
                         "/like",
                         "/follow",
-                        "/unfollow"
+                        "/unfollow",
+                        "/discuss/delete"
                 ).hasAnyAuthority(
                     AUTHORITY_USER,
                     AUTHORITY_ADMIN,
                     AUTHORITY_MODERATOR
                 ).requestMatchers(
-                "/discuss/top",
+                        "/discuss/top",
                         "/discuss/wonderful"
+
                 ).hasAnyAuthority(
                     AUTHORITY_MODERATOR
                 ).requestMatchers(
-                        "/discuss/delete",
+//                        "/discuss/delete",
                         "/data/**"
                 ).hasAnyAuthority(
                     AUTHORITY_ADMIN
