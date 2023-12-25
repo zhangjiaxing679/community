@@ -2,7 +2,7 @@ package com.nowcoder.community.quartz;
 
 import com.nowcoder.community.entity.DiscussPost;
 import com.nowcoder.community.service.DiscussPostService;
-import com.nowcoder.community.service.ElasticsearchService;
+//import com.nowcoder.community.service.ElasticsearchService;
 import com.nowcoder.community.service.LikeService;
 import com.nowcoder.community.util.CommunityConstant;
 
@@ -35,8 +35,8 @@ public class PostScoreRefreshJob implements Job, CommunityConstant {
     @Autowired
     private LikeService likeService;
 
-    @Autowired
-    private ElasticsearchService elasticsearchService;
+//    @Autowired
+//    private ElasticsearchService elasticsearchService;
 
     //牛客纪元
     private static final Date epoch ;
@@ -90,7 +90,7 @@ public class PostScoreRefreshJob implements Job, CommunityConstant {
         discussPostService.updateScore(postId,score);
         //同步搜索数据
         post.setScore(score);
-        elasticsearchService.saveDiscussPost(post);
+//        elasticsearchService.saveDiscussPost(post);
     }
 
 }
