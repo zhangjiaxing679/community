@@ -215,12 +215,13 @@ public class UserController implements CommunityConstant {
         return "site/profile";
     }
 
-    //我的帖子
-    @RequestMapping(path = "/mypost", method = RequestMethod.GET)
-    public String getMyPost(Model model, Page page) {
-        User user = hostHolder.getUser();
-        int userId = user.getId();
-        model.addAttribute("userId", userId);
+    //帖子
+    @RequestMapping(path = "/post/{userId}", method = RequestMethod.GET)
+    public String getPost(@PathVariable("userId") int userId, Model model, Page page) {
+        User user = userService.findUserById(userId);
+        if (user == null) {
+            throw new RuntimeException("该用户不存在");
+        }
 
         //帖子总数
         int discussPostRows = discussPostService.findDiscussPostRows(userId);
@@ -228,7 +229,7 @@ public class UserController implements CommunityConstant {
 
         //分页信息
         page.setLimit(5);
-        page.setPath("/user/mypost");
+        page.setPath("/user/post/" + userId);
         page.setRows(discussPostRows);
 
         //帖子
@@ -250,12 +251,13 @@ public class UserController implements CommunityConstant {
         return "site/my-post";
     }
 
-    //我的回复
-    @RequestMapping(path = "/myreply", method = RequestMethod.GET)
-    public String getMyReply(Model model, Page page) {
-        User user = hostHolder.getUser();
-        int userId = user.getId();
-        model.addAttribute("userId", userId);
+    //回复
+    @RequestMapping(path = "/reply/{userId}", method = RequestMethod.GET)
+    public String getReply(@PathVariable("userId") int userId, Model model, Page page) {
+        User user = userService.findUserById(userId);
+        if (user == null) {
+            throw new RuntimeException("该用户不存在");
+        }
 
         //帖子总数
         int discussPostRows = commentService.findCommentCounts(1, userId);
@@ -263,7 +265,7 @@ public class UserController implements CommunityConstant {
 
         //分页信息
         page.setLimit(5);
-        page.setPath("/user/myreply");
+        page.setPath("/user/reply/" + userId);
         page.setRows(discussPostRows);
 
         //帖子
