@@ -199,6 +199,9 @@ public class DiscusssPostController implements CommunityConstant{
 
             eventProducer.fireEvent(event);
 
+            //计算帖子分数
+            String redisKey= RedisKeyUtil.getPostScoreKey();
+            redisTemplate.opsForSet().add(redisKey,id);
 
             return CommunityUtil.getJSONString(0);
         }
